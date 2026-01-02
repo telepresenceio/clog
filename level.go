@@ -25,3 +25,7 @@ func ParseLevel(s string) (l slog.Level) {
 	}
 	return l
 }
+
+type LevelSetter interface {
+	SetLevel(slog.Level)
+}

@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"strconv"
+	"sync/atomic"
 	"unicode"
 )
 
@@ -20,7 +21,7 @@ import (
 func NewCondensedHandler(out io.Writer, timeFormat string, level slog.Level) slog.Handler {
 	return &condensedHandler{
 		timeFormat:    timeFormat,
-		level:         level,
+		level:         int64(level),
 		out:           out,
 		includeSource: level < slog.LevelDebug,
 	}
@@ -28,7 +29,7 @@ func NewCondensedHandler(out io.Writer, timeFormat string, level slog.Level) slo
 
 type condensedHandler struct {
 	timeFormat    string
-	level         slog.Level
+	level         int64
 	attrs         []slog.Attr
 	groups        []string
 	out           io.Writer
@@ -77,7 +78,7 @@ func addGroup(name string, attrs []slog.Attr, buf *bytesBuf) {
 }
 
 func (h *condensedHandler) Enabled(_ context.Context, level slog.Level) bool {
-	return level >= h.level
+	return int64(level) >= atomic.LoadInt64(&h.level)
 }
 
 // formatArgsKey is the key for the arguments to a printf style log message. The arguments are wrapped in
@@ -186,6 +187,10 @@ func (h *condensedHandler) Handle(_ context.Context, record slog.Record) error {
 	_, err := h.out.Write(*buf)
 	buf.free()
 	return err
+}
+
+func (h *condensedHandler) SetLevel(l slog.Level) {
+	atomic.StoreInt64(&h.level, int64(l))
 }
 
 func (h *condensedHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
