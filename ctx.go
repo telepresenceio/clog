@@ -12,8 +12,10 @@ import (
 var TimeNow = time.Now
 
 // Debug is similar to [slog.Logger.DebugContext] on the context logger.
-func Debug(ctx context.Context, message string, args ...any) {
-	log(ctx, slog.LevelDebug, message, args...)
+// The first argument is converted using [fmt.Sprint] and used as the log message. Remaining args
+// are handled according to [slog.Logger.Log].
+func Debug(ctx context.Context, args ...any) {
+	log(ctx, slog.LevelDebug, args...)
 }
 
 // DebugAttrs is similar to [slog.Logger.LogAttrs] on the context logger, called with [slog.LevelDebug].
@@ -31,8 +33,10 @@ func Enabled(ctx context.Context, level slog.Level) bool {
 }
 
 // Error is similar to [slog.Logger.ErrorContext] on the context logger.
-func Error(ctx context.Context, message string, args ...any) {
-	log(ctx, slog.LevelError, message, args...)
+// The first argument is converted using [fmt.Sprint] and used as the log message. Remaining args
+// are handled according to [slog.Logger.Log].
+func Error(ctx context.Context, args ...any) {
+	log(ctx, slog.LevelError, args...)
 }
 
 // ErrorAttrs is similar to [slog.Logger.LogAttrs] on the context logger, called with [slog.LevelError].
@@ -46,8 +50,10 @@ func Errorf(ctx context.Context, format string, args ...any) {
 }
 
 // Info is similar to [slog.Logger.InfoContext] on the context logger.
-func Info(ctx context.Context, message string, args ...any) {
-	log(ctx, slog.LevelInfo, message, args...)
+// The first argument is converted using [fmt.Sprint] and used as the log message. Remaining args
+// are handled according to [slog.Logger.Log].
+func Info(ctx context.Context, args ...any) {
+	log(ctx, slog.LevelInfo, args...)
 }
 
 // InfoAttrs is similar to [slog.Logger.LogAttrs] on the context logger, called with [slog.LevelInfo].
@@ -61,8 +67,10 @@ func Infof(ctx context.Context, format string, args ...any) {
 }
 
 // Log is similar to calling [slog.Logger.Log] on the context logger.
-func Log(ctx context.Context, level slog.Level, msg string, args ...any) {
-	log(ctx, level, msg, args...)
+// The first argument is converted using [fmt.Sprint] and used as the log message. Remaining args
+// are handled according to [slog.Logger.Log].
+func Log(ctx context.Context, level slog.Level, args ...any) {
+	log(ctx, level, args...)
 }
 
 // LogAttrs is similar to [slog.Logger.LogAttrs] on the context logger.
@@ -79,8 +87,10 @@ func Logger(ctx context.Context) *slog.Logger {
 }
 
 // Trace is similar to [slog.Logger.Log] on the context logger, called with [LevelTrace].
-func Trace(ctx context.Context, message string, args ...any) {
-	log(ctx, LevelTrace, message, args...)
+// The first argument is converted using [fmt.Sprint] and used as the log message. Remaining args
+// are handled according to [slog.Logger.Log].
+func Trace(ctx context.Context, args ...any) {
+	log(ctx, LevelTrace, args...)
 }
 
 // TraceAttrs is similar to [slog.Logger.LogAttrs] on the context logger, called with [LevelTrace].
@@ -94,8 +104,10 @@ func Tracef(ctx context.Context, format string, args ...any) {
 }
 
 // Warn is similar to [slog.Logger.WarnContext] on the context logger.
-func Warn(ctx context.Context, message string, args ...any) {
-	log(ctx, slog.LevelWarn, message, args...)
+// The first argument is converted using [fmt.Sprint] and used as the log message. Remaining args
+// are handled according to [slog.Logger.Log].
+func Warn(ctx context.Context, args ...any) {
+	log(ctx, slog.LevelWarn, args...)
 }
 
 // WarnAttrs is similar to [slog.Logger.LogAttrs] on the context logger, called with [slog.LevelWarn].
@@ -131,11 +143,16 @@ func WithGroup(ctx context.Context, group string) context.Context {
 
 type loggerKey struct{}
 
-func log(ctx context.Context, level slog.Level, message string, args ...any) {
+func log(ctx context.Context, level slog.Level, args ...any) {
 	h := Logger(ctx).Handler()
-	if h.Enabled(ctx, level) {
-		r := newRecord(level, message)
-		r.Add(args...)
+	if h.Enabled(ctx, level) && len(args) > 0 {
+		a0 := args[0]
+		msg, ok := a0.(string)
+		if !ok {
+			msg = fmt.Sprint(a0)
+		}
+		r := newRecord(level, msg)
+		r.Add(args[1:]...)
 		_ = h.Handle(ctx, r)
 	}
 }
