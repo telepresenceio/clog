@@ -24,7 +24,7 @@ func ExampleInfof() {
 
 func ExampleNewCondensedHandler() {
 	fakeTime()
-	lg := slog.New(clog.NewCondensedHandler(os.Stdout, "15:04:05.0000", slog.LevelDebug))
+	lg := slog.New(clog.NewCondensedHandler(os.Stdout, "15:04:05.0000", clog.LevelDebug))
 	ctx := clog.WithLogger(context.Background(), lg)
 
 	clog.Infof(ctx, "Hello, %s!", "world")
@@ -43,7 +43,7 @@ func ExampleNewCondensedHandler() {
 
 func ExampleInfof_withAttrsAndGroups() {
 	fakeTime()
-	lg := slog.New(clog.NewCondensedHandler(os.Stdout, "15:04:05.0000", slog.LevelDebug))
+	lg := slog.New(clog.NewCondensedHandler(os.Stdout, "15:04:05.0000", clog.LevelDebug))
 	topCtx := clog.WithLogger(context.Background(), lg)
 
 	clog.Infof(topCtx, "Hello, %s!", "world")

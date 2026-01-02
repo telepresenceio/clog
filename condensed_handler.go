@@ -18,12 +18,12 @@ import (
 //   - Top level groups are written as "group/subgroup" before the message.
 //   - Attributes are written as "key=value" and the value is quoted if it contains Unicode space characters, non-printing characters, '"' or '='.
 //   - The source file and line number are written after the message if the log level is [LevelTrace].
-func NewCondensedHandler(out io.Writer, timeFormat string, level slog.Level) slog.Handler {
+func NewCondensedHandler(out io.Writer, timeFormat string, level Level) slog.Handler {
 	return &condensedHandler{
 		timeFormat:    timeFormat,
 		level:         int64(level),
 		out:           out,
-		includeSource: level < slog.LevelDebug,
+		includeSource: level < LevelDebug,
 	}
 }
 
@@ -77,7 +77,7 @@ func addGroup(name string, attrs []slog.Attr, buf *bytesBuf) {
 	}
 }
 
-func (h *condensedHandler) Enabled(_ context.Context, level slog.Level) bool {
+func (h *condensedHandler) Enabled(_ context.Context, level Level) bool {
 	return int64(level) >= atomic.LoadInt64(&h.level)
 }
 
@@ -85,10 +85,6 @@ func (h *condensedHandler) Enabled(_ context.Context, level slog.Level) bool {
 // a [slog.Attr] with this key and added to the log record so that the actual formatting can be deferred until
 // the record is serialized.
 const formatArgsKey = "formatArgs"
-
-// LevelTrace is the most verbose log level.
-// When used, the output will also contain file:line information.
-const LevelTrace = slog.LevelDebug - 4
 
 // extractFormatArgs extracts arguments intended for [fmt.Format] style logging from the record and returns them along with the remaining attributes.
 // Format arguments that are [slog.Attr] are converted to strings before being returned.
@@ -115,8 +111,8 @@ func extractFormatArgs(record *slog.Record) ([]any, []slog.Attr) {
 }
 
 // levelString writes the log level as a string to buf, padded to 6 characters.
-func levelString(l slog.Level, buf *bytesBuf) {
-	str := func(base string, val slog.Level) {
+func levelString(l Level, buf *bytesBuf) {
+	str := func(base string, val Level) {
 		var n int
 		if val == 0 {
 			buf.writeString(base)
@@ -129,16 +125,16 @@ func levelString(l slog.Level, buf *bytesBuf) {
 		}
 	}
 	switch {
-	case l < slog.LevelDebug:
+	case l < LevelDebug:
 		str("trace", l-LevelTrace)
-	case l < slog.LevelInfo:
-		str("debug", l-slog.LevelDebug)
-	case l < slog.LevelWarn:
-		str("info", l-slog.LevelInfo)
-	case l < slog.LevelError:
-		str("warn", l-slog.LevelWarn)
+	case l < LevelInfo:
+		str("debug", l-LevelDebug)
+	case l < LevelWarn:
+		str("info", l-LevelInfo)
+	case l < LevelError:
+		str("warn", l-LevelWarn)
 	default:
-		str("error", l-slog.LevelError)
+		str("error", l-LevelError)
 	}
 }
 
@@ -189,7 +185,7 @@ func (h *condensedHandler) Handle(_ context.Context, record slog.Record) error {
 	return err
 }
 
-func (h *condensedHandler) SetLevel(l slog.Level) {
+func (h *condensedHandler) SetLevel(l Level) {
 	atomic.StoreInt64(&h.level, int64(l))
 }
 

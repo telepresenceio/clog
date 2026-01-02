@@ -23,7 +23,7 @@ import (
 )
 
 func main() {
-	handler := clog.NewCondensedHandler(os.Stdout, "15:04:05.0000", slog.LevelDebug)
+	handler := clog.NewCondensedHandler(os.Stdout, "15:04:05.0000", clog.LevelDebug)
 	ctx := clog.WithLogger(context.Background(), slog.New(handler))
 	clog.Infof(ctx, "Hello, %s!", "world")
 }

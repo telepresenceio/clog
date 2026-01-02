@@ -7,7 +7,7 @@ import (
 
 type writer struct {
 	log   *slog.Logger
-	level slog.Level
+	level Level
 	ctx   context.Context
 }
 

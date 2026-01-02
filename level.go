@@ -6,20 +6,32 @@ import (
 	"strings"
 )
 
-// ParseLevel parses a log level string into a slog.Level. It panics if the lowercased version of
+const (
+	// LevelTrace is the most verbose log level.
+	// When used, the output will also contain file:line information.
+	LevelTrace = slog.LevelDebug - 4
+	LevelDebug = slog.LevelDebug
+	LevelInfo  = slog.LevelInfo
+	LevelWarn  = slog.LevelWarn
+	LevelError = slog.LevelError
+)
+
+type Level = slog.Level
+
+// ParseLevel parses a log level string into a Level. It panics if the lowercased version of
 // the string is not one of "trace", "debug", "info", "warn", "warning", or "error".
-func ParseLevel(s string) (l slog.Level) {
+func ParseLevel(s string) (l Level) {
 	switch strings.ToLower(s) {
 	case "trace":
 		l = LevelTrace
 	case "debug":
-		l = slog.LevelDebug
+		l = LevelDebug
 	case "info":
-		l = slog.LevelInfo
+		l = LevelInfo
 	case "warn", "warning":
-		l = slog.LevelWarn
+		l = LevelWarn
 	case "error":
-		l = slog.LevelError
+		l = LevelError
 	default:
 		panic(fmt.Sprintf("unknown log level: %q", s))
 	}
@@ -27,5 +39,5 @@ func ParseLevel(s string) (l slog.Level) {
 }
 
 type LevelSetter interface {
-	SetLevel(slog.Level)
+	SetLevel(Level)
 }
