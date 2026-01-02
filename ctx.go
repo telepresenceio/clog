@@ -3,6 +3,7 @@ package clog
 import (
 	"context"
 	"fmt"
+	stdLog "log"
 	"log/slog"
 	"runtime"
 	"time"
@@ -89,6 +90,10 @@ func Logger(ctx context.Context) *slog.Logger {
 		return l
 	}
 	return slog.Default()
+}
+
+func StdLogger(ctx context.Context, level slog.Level) *stdLog.Logger {
+	return stdLog.New(&writer{log: Logger(ctx), level: level, ctx: ctx}, "", 0)
 }
 
 // Trace is similar to [slog.Logger.Log] on the context logger, called with [LevelTrace].
