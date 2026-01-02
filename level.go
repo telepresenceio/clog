@@ -20,7 +20,7 @@ type Level = slog.Level
 
 // ParseLevel parses a log level string into a Level. It panics if the lowercased version of
 // the string is not one of "trace", "debug", "info", "warn", "warning", or "error".
-func ParseLevel(s string) (l Level) {
+func ParseLevel(s string) (l Level, err error) {
 	switch strings.ToLower(s) {
 	case "trace":
 		l = LevelTrace
@@ -33,7 +33,16 @@ func ParseLevel(s string) (l Level) {
 	case "error":
 		l = LevelError
 	default:
-		panic(fmt.Sprintf("unknown log level: %q", s))
+		return 0, fmt.Errorf("unknown log level: %q", s)
+	}
+	return l, nil
+}
+
+// MustParseLevel is like ParseLevel, but panics if the string is invalid.
+func MustParseLevel(s string) Level {
+	l, err := ParseLevel(s)
+	if err != nil {
+		panic(err)
 	}
 	return l
 }
