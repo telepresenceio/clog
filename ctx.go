@@ -78,6 +78,11 @@ func LogAttrs(ctx context.Context, level slog.Level, msg string, attrs ...slog.A
 	logAttrs(ctx, level, msg, attrs...)
 }
 
+// Logf is similar to [slog.Logger.Log] on the context logger, called with a message formatted with [fmt.Sprintf].
+func Logf(ctx context.Context, level slog.Level, format string, args ...any) {
+	logf(ctx, level, format, args...)
+}
+
 // Logger returns the logger from the context, or the default logger if none is set.
 func Logger(ctx context.Context) *slog.Logger {
 	if l, ok := ctx.Value(loggerKey{}).(*slog.Logger); ok {
