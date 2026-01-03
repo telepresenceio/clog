@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"slices"
 	"strconv"
 	"sync/atomic"
 	"unicode"
@@ -88,7 +89,7 @@ const formatArgsKey = "formatArgs"
 
 // extractFormatArgs extracts arguments intended for [fmt.Format] style logging from the record and returns them along with the remaining attributes.
 // Format arguments that are [slog.Attr] are converted to strings before being returned.
-func extractFormatArgs(record *slog.Record) ([]any, []slog.Attr) {
+func (h *condensedHandler) extractFormatArgs(record *slog.Record) ([]any, []slog.Attr) {
 	var fmtArgs []any
 	var otherAttrs []slog.Attr
 	record.Attrs(func(a slog.Attr) bool {
@@ -107,7 +108,7 @@ func extractFormatArgs(record *slog.Record) ([]any, []slog.Attr) {
 		}
 		return true
 	})
-	return fmtArgs, otherAttrs
+	return fmtArgs, slices.Concat(h.attrs, otherAttrs)
 }
 
 // levelString writes the log level as a string to buf, padded to 6 characters.
@@ -144,7 +145,7 @@ func (h *condensedHandler) Handle(_ context.Context, record slog.Record) error {
 	buf.writeString(record.Time.Format(h.timeFormat))
 	buf.writeByte(' ')
 	levelString(record.Level, buf)
-	fmtArgs, attrs := extractFormatArgs(&record)
+	fmtArgs, attrs := h.extractFormatArgs(&record)
 	groups := h.groups
 
 	// Merge stand-alone top level group into groups.
