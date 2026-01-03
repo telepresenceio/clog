@@ -18,6 +18,11 @@ const (
 
 type Level = slog.Level
 
+// LevelStrings is the list of log level strings in order of increasing verbosity.
+var LevelStrings = []string{
+	"error", "warn", "warning", "info", "debug", "trace",
+}
+
 // ParseLevel parses a log level string into a Level. It panics if the lowercased version of
 // the string is not one of "trace", "debug", "info", "warn", "warning", or "error".
 func ParseLevel(s string) (l Level, err error) {
