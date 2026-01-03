@@ -24,7 +24,7 @@ func ExampleInfof() {
 
 func ExampleNewCondensedHandler() {
 	fakeTime()
-	lg := slog.New(clog.NewCondensedHandler(os.Stdout, "15:04:05.0000", clog.LevelDebug))
+	lg := slog.New(clog.NewCondensedHandler(clog.TimeFormat(""), clog.EnabledLevel(clog.LevelInfo), clog.HideLevel(clog.LevelWarn)))
 	ctx := clog.WithLogger(context.Background(), lg)
 
 	clog.Infof(ctx, "Hello, %s!", "world")
@@ -34,17 +34,21 @@ func ExampleNewCondensedHandler() {
 
 	ctx = clog.WithGroup(ctx, "second")
 	clog.Infof(ctx, "Hello, nested %s!", "world")
+	clog.Warn(ctx, "This is a warning!")
 
 	// Output:
-	// 03:04:05.6789 info  Hello, world!
-	// 03:04:05.6789 info  first: Hello, world!
-	// 03:04:05.6789 info  first/second: Hello, nested world!
+	// info  Hello, world!
+	// info  first: Hello, world!
+	// info  first/second: Hello, nested world!
+	// first/second: This is a warning!
 }
 
 func ExampleInfof_withAttrsAndGroups() {
 	fakeTime()
-	lg := slog.New(clog.NewCondensedHandler(os.Stdout, "15:04:05.0000", clog.LevelDebug))
+	lg := slog.New(clog.NewCondensedHandler(clog.TimeFormat("15:04:05.0000"), clog.EnabledLevel(clog.LevelInfo)))
 	topCtx := clog.WithLogger(context.Background(), lg)
+
+	clog.Debug(topCtx, "Hello, world!")
 
 	clog.Infof(topCtx, "Hello, %s!", "world")
 
