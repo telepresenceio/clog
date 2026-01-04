@@ -12,6 +12,10 @@ import (
 // TimeNow is for test purposes only.
 var TimeNow = time.Now
 
+type FormatHandler interface {
+	HandleFormat(context.Context, *slog.Record, []any) error
+}
+
 // Debug is similar to [slog.Logger.DebugContext] on the context logger.
 // The first argument is converted using [fmt.Sprint] and used as the log message. Remaining args
 // are handled according to [slog.Logger.Log].
@@ -180,16 +184,15 @@ func logf(ctx context.Context, level Level, format string, args ...any) {
 	h := Logger(ctx).Handler()
 	if h.Enabled(ctx, level) {
 		var r slog.Record
-		if _, ok := h.(*condensedHandler); ok {
-			// Defer formatting so that the handlers internal buffer can be used instead of
+		if fh, ok := h.(FormatHandler); ok {
+			// Defer formatting so that the handler's internal buffer can be used instead of
 			// having fmt.Sprintf allocating one here.
 			r = newRecord(level, format)
-			r.AddAttrs(slog.Any(formatArgsKey, args))
+			_ = fh.HandleFormat(ctx, &r, args)
 		} else {
 			// This is unfortunate, but slog does not provide a way to defer the creation of the actual message.
-			r = newRecord(level, fmt.Sprintf(format, args...))
+			_ = h.Handle(ctx, newRecord(level, fmt.Sprintf(format, args...)))
 		}
-		_ = h.Handle(ctx, r)
 	}
 }
 

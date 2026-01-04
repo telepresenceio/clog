@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/telepresenceio/clog"
+	"github.com/telepresenceio/clog/handler"
 )
 
 func fakeTime() {
@@ -22,9 +23,9 @@ func ExampleInfof() {
 	// time=2026-01-02T03:04:05.678Z level=INFO msg="Hello, world!"
 }
 
-func ExampleNewCondensedHandler() {
+func ExampleNewText() {
 	fakeTime()
-	lg := slog.New(clog.NewCondensedHandler(clog.TimeFormat(""), clog.EnabledLevel(clog.LevelInfo), clog.HideLevel(clog.LevelWarn)))
+	lg := slog.New(handler.NewText(handler.TimeFormat(""), handler.EnabledLevel(clog.LevelInfo), handler.HideLevel(clog.LevelWarn)))
 	ctx := clog.WithLogger(context.Background(), lg)
 
 	clog.Infof(ctx, "Hello, %s!", "world")
@@ -45,7 +46,7 @@ func ExampleNewCondensedHandler() {
 
 func ExampleInfof_withAttrsAndGroups() {
 	fakeTime()
-	lg := slog.New(clog.NewCondensedHandler(clog.TimeFormat("15:04:05.0000"), clog.EnabledLevel(clog.LevelInfo)))
+	lg := slog.New(handler.NewText(handler.TimeFormat("15:04:05.0000"), handler.EnabledLevel(clog.LevelInfo)))
 	topCtx := clog.WithLogger(context.Background(), lg)
 
 	clog.Debug(topCtx, "Hello, world!")
@@ -76,7 +77,7 @@ func ExampleInfof_withAttrsAndGroups() {
 	// 03:04:05.6789 info  group: Hello, world! : this=value hello={that=thing is="so \"cool\""}
 	// 03:04:05.6789 info  group: Hello, world! : this=value hello/that={thing="is cool"}
 	// 03:04:05.6789 info  Hello, world! : this=value hello/that={thing="is cool"}
-	// 03:04:05.6789 info  group: Hello, world! group={this=value hello/that={thing="is \"cool\""}}
+	// 03:04:05.6789 info  group: Hello, world! group=[this=value hello=[that=[thing=is "cool"]]]
 	// 03:04:05.6789 info  group: Hello, world! value=2.24
 	// 03:04:05.6789 info  group: Hello, world! value: 2.240
 }
