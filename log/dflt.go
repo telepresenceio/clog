@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	stdLog "log"
+	"log/slog"
 
 	"github.com/telepresenceio/clog"
 	"github.com/telepresenceio/clog/internal"
@@ -16,6 +17,10 @@ func Debugf(format string, args ...any) {
 // Errorf is [clog.Errorf] using the default logger.
 func Errorf(format string, args ...any) {
 	internal.Logf(context.Background(), clog.LevelError, format, args...)
+}
+
+func Enabled(level clog.Level) bool {
+	return slog.Default().Enabled(context.Background(), level)
 }
 
 // Infof is [clog.Infof] using the default logger.
