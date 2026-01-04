@@ -8,10 +8,11 @@ import (
 
 	"github.com/telepresenceio/clog"
 	"github.com/telepresenceio/clog/handler"
+	"github.com/telepresenceio/clog/internal"
 )
 
 func fakeTime() {
-	clog.TimeNow = func() time.Time { return time.Date(2026, 1, 2, 3, 4, 5, 678900000, time.UTC) }
+	internal.TimeNow = func() time.Time { return time.Date(2026, 1, 2, 3, 4, 5, 678900000, time.UTC) }
 }
 
 func ExampleInfof() {
@@ -24,7 +25,6 @@ func ExampleInfof() {
 }
 
 func ExampleNewText() {
-	fakeTime()
 	lg := slog.New(handler.NewText(handler.TimeFormat(""), handler.EnabledLevel(clog.LevelInfo), handler.HideLevel(clog.LevelWarn)))
 	ctx := clog.WithLogger(context.Background(), lg)
 

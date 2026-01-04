@@ -10,6 +10,8 @@ The `clog` package provides the following functionality:
 - Functions like `Errorf`, `Warningf`, `Infof`, `Debugf` and `Tracef` that understans standard `fmt.Format` semantics. 
 - A `CondensedHandler` that outputs a condensed version of the log message, using key=value pairs only for extra `slog.Attr` values. This handler also defers the creation of the log message when the message stems from a function that uses `fmt.Format` semantics so that it is produced with `fmt.Fprintf` on an internal buffer.
 
+The `clog` package has no external dependencies.
+
 ## Usage
 
 ```go
@@ -20,11 +22,13 @@ import (
 	"os"
 
 	"github.com/telepresenceio/clog"
+	"github.com/telepresenceio/clog/handler"
 )
 
 func main() {
-	handler := clog.NewCondensedHandler(os.Stdout, "15:04:05.0000", clog.LevelDebug)
-	ctx := clog.WithLogger(context.Background(), slog.New(handler))
+	h := handler.NewText(
+		handler.Output(os.Stdout), handler.TimeFormat("15:04:05.0000"), handler.EnabledLevel(clog.LevelDebug))
+	ctx := clog.WithLogger(context.Background(), slog.New(h))
 	clog.Infof(ctx, "Hello, %s!", "world")
 }
 ```
