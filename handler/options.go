@@ -3,14 +3,12 @@ package handler
 import (
 	"io"
 	"log/slog"
-
-	"github.com/telepresenceio/clog"
 )
 
 type Option func(*textHandler)
 
 // EnabledLevel sets the minimum log level to be handled by the handler.
-func EnabledLevel(level clog.Level) Option {
+func EnabledLevel(level slog.Level) Option {
 	return func(h *textHandler) {
 		h.SetLevel(level)
 	}
@@ -35,7 +33,7 @@ func Groups(groups ...string) Option {
 // level information redundant. Example:
 //
 //	HideLevel(LevelWarn) hides all levels LevelWarn and LevelError.
-func HideLevel(level clog.Level) Option {
+func HideLevel(level slog.Level) Option {
 	return func(h *textHandler) {
 		h.hideLevelsAbove = level
 	}

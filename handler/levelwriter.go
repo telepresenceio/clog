@@ -2,19 +2,18 @@ package handler
 
 import (
 	"io"
-
-	"github.com/telepresenceio/clog"
+	"log/slog"
 )
 
 type LevelWriter interface {
-	Write(level clog.Level, data []byte) (int, error)
+	Write(level slog.Level, data []byte) (int, error)
 }
 
 type allLevelsWriter struct {
 	out io.Writer
 }
 
-func (a allLevelsWriter) Write(_ clog.Level, data []byte) (int, error) {
+func (a allLevelsWriter) Write(_ slog.Level, data []byte) (int, error) {
 	return a.out.Write(data)
 }
 

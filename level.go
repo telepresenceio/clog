@@ -6,45 +6,65 @@ import (
 	"strings"
 )
 
-const (
-	// LevelTrace is the most verbose log level.
-	// When used, the output will also contain file:line information.
-	LevelTrace = slog.LevelDebug - 4
-	LevelDebug = slog.LevelDebug
-	LevelInfo  = slog.LevelInfo
-	LevelWarn  = slog.LevelWarn
-	LevelError = slog.LevelError
-)
+// LevelTrace is the most verbose log level.
+// When used, the output will also contain file:line information.
+const LevelTrace = slog.LevelDebug - 4
 
-type Level = slog.Level
+// LevelWithTrace redefines slog.Level with an UnmarshalText to support the "trace" log level.
+// It's suitable when used as a field that well be subjected to automatic parsing but
+// shouldn't otherwise be used. Use `slog.Level` whenever possible.
+type LevelWithTrace slog.Level
 
 // LevelStrings is the list of log level strings in order of increasing verbosity.
 var LevelStrings = []string{
-	"error", "warn", "warning", "info", "debug", "trace",
+	"ERROR", "WARN", "INFO", "DEBUG", "TRACE",
+}
+
+func (l LevelWithTrace) String() (s string) {
+	sl := slog.Level(l)
+	diff := sl - slog.LevelDebug
+	switch {
+	case diff == -4:
+		s = "TRACE"
+	case diff < 0:
+		s = fmt.Sprintf("TRACE%+d", diff)
+	default:
+		s = sl.String()
+	}
+	return s
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (l LevelWithTrace) MarshalText() ([]byte, error) {
+	return []byte(l.String()), nil
+}
+
+// UnmarshalText parses a log level string into a Level. It panics if the lowercased version of
+// the string is not one of "trace", "debug", "info", "warn", "warning", or "error".
+//goland:noinspection GoMixedReceiverTypes
+func (l *LevelWithTrace) UnmarshalText(value []byte) error {
+	var sl slog.Level
+	err := sl.UnmarshalText(value)
+	switch {
+	case err == nil:
+		*l = LevelWithTrace(sl)
+	case strings.EqualFold(string(value), "TRACE"):
+		*l = LevelWithTrace(LevelTrace)
+		err = nil
+	}
+	return err
 }
 
 // ParseLevel parses a log level string into a Level. It panics if the lowercased version of
 // the string is not one of "trace", "debug", "info", "warn", "warning", or "error".
-func ParseLevel(s string) (l Level, err error) {
-	switch strings.ToLower(s) {
-	case "trace":
-		l = LevelTrace
-	case "debug":
-		l = LevelDebug
-	case "info":
-		l = LevelInfo
-	case "warn", "warning":
-		l = LevelWarn
-	case "error":
-		l = LevelError
-	default:
-		return 0, fmt.Errorf("unknown log level: %q", s)
-	}
-	return l, nil
+func ParseLevel(s string) (slog.Level, error) {
+	var l LevelWithTrace
+	err := l.UnmarshalText([]byte(s))
+	return slog.Level(l), err
 }
 
 // MustParseLevel is like ParseLevel, but panics if the string is invalid.
-func MustParseLevel(s string) Level {
+func MustParseLevel(s string) slog.Level {
 	l, err := ParseLevel(s)
 	if err != nil {
 		panic(err)
@@ -53,5 +73,5 @@ func MustParseLevel(s string) Level {
 }
 
 type LevelSetter interface {
-	SetLevel(Level)
+	SetLevel(slog.Level)
 }
