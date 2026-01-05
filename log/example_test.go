@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/telepresenceio/clog"
 	"github.com/telepresenceio/clog/handler"
 	"github.com/telepresenceio/clog/log"
 )
@@ -31,7 +30,7 @@ func ExampleWithLogger_slogTextHandler() {
 }
 
 func ExampleWithLogger_clogTextHandler() {
-	slog.SetDefault(slog.New(handler.NewText(handler.TimeFormat(""), handler.EnabledLevel(clog.LevelInfo))))
+	slog.SetDefault(slog.New(handler.NewText(handler.TimeFormat(""), handler.EnabledLevel(slog.LevelInfo))))
 
 	log.Infof("Hello, %s!", "world")
 

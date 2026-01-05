@@ -25,7 +25,7 @@ func ExampleInfof() {
 }
 
 func ExampleNewText() {
-	lg := slog.New(handler.NewText(handler.TimeFormat(""), handler.EnabledLevel(clog.LevelInfo), handler.HideLevel(clog.LevelWarn)))
+	lg := slog.New(handler.NewText(handler.TimeFormat(""), handler.EnabledLevel(slog.LevelInfo), handler.HideLevel(slog.LevelWarn)))
 	ctx := clog.WithLogger(context.Background(), lg)
 
 	clog.Infof(ctx, "Hello, %s!", "world")
@@ -38,15 +38,15 @@ func ExampleNewText() {
 	clog.Warn(ctx, "This is a warning!")
 
 	// Output:
-	// info  Hello, world!
-	// info  first: Hello, world!
-	// info  first/second: Hello, nested world!
+	// INFO  Hello, world!
+	// INFO  first: Hello, world!
+	// INFO  first/second: Hello, nested world!
 	// first/second: This is a warning!
 }
 
 func ExampleInfof_withAttrsAndGroups() {
 	fakeTime()
-	lg := slog.New(handler.NewText(handler.TimeFormat("15:04:05.0000"), handler.EnabledLevel(clog.LevelInfo)))
+	lg := slog.New(handler.NewText(handler.TimeFormat("15:04:05.0000"), handler.EnabledLevel(slog.LevelInfo)))
 	topCtx := clog.WithLogger(context.Background(), lg)
 
 	clog.Debug(topCtx, "Hello, world!")
@@ -71,13 +71,13 @@ func ExampleInfof_withAttrsAndGroups() {
 	clog.Infof(ctx, "Hello, world! value: %.3f", 2.24)
 
 	// Output:
-	// 03:04:05.6789 info  Hello, world!
-	// 03:04:05.6789 info  group: Hello, world!
-	// 03:04:05.6789 info  group/hello: Hello, world! : this=value
-	// 03:04:05.6789 info  group: Hello, world! : this=value hello={that=thing is="so \"cool\""}
-	// 03:04:05.6789 info  group: Hello, world! : this=value hello/that={thing="is cool"}
-	// 03:04:05.6789 info  Hello, world! : this=value hello/that={thing="is cool"}
-	// 03:04:05.6789 info  group: Hello, world! group=[this=value hello=[that=[thing=is "cool"]]]
-	// 03:04:05.6789 info  group: Hello, world! value=2.24
-	// 03:04:05.6789 info  group: Hello, world! value: 2.240
+	// 03:04:05.6789 INFO  Hello, world!
+	// 03:04:05.6789 INFO  group: Hello, world!
+	// 03:04:05.6789 INFO  group/hello: Hello, world! : this=value
+	// 03:04:05.6789 INFO  group: Hello, world! : this=value hello={that=thing is="so \"cool\""}
+	// 03:04:05.6789 INFO  group: Hello, world! : this=value hello/that={thing="is cool"}
+	// 03:04:05.6789 INFO  Hello, world! : this=value hello/that={thing="is cool"}
+	// 03:04:05.6789 INFO  group: Hello, world! group=[this=value hello=[that=[thing=is "cool"]]]
+	// 03:04:05.6789 INFO  group: Hello, world! value=2.24
+	// 03:04:05.6789 INFO  group: Hello, world! value: 2.240
 }
