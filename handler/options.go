@@ -1,16 +1,26 @@
 package handler
 
 import (
+	"context"
 	"io"
 	"log/slog"
 )
 
 type Option func(*textHandler)
 
+type EnabledFunc func(context.Context, slog.Level) bool
+
 // EnabledLevel sets the minimum log level to be handled by the handler.
 func EnabledLevel(level slog.Level) Option {
 	return func(h *textHandler) {
-		h.SetLevel(level)
+		h.levelEnabler = func(_ context.Context, l slog.Level) bool { return l >= level }
+	}
+}
+
+// LevelEnabler sets the function that returns the minimum log level to be handled by the handler.
+func LevelEnabler(enabler EnabledFunc) Option {
+	return func(h *textHandler) {
+		h.levelEnabler = enabler
 	}
 }
 

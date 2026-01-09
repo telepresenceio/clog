@@ -44,6 +44,32 @@ func ExampleNewText() {
 	// first/second: This is a warning!
 }
 
+func ExampleNewText_levelEnabler() {
+	type lvlKey struct{}
+	lvl := slog.LevelInfo
+	ctx := context.WithValue(context.Background(), lvlKey{}, &lvl)
+	levelEnabler := func(ctx context.Context, level slog.Level) bool {
+		if lvp, ok := ctx.Value(lvlKey{}).(*slog.Level); ok {
+			return level >= *lvp
+		}
+		return false
+	}
+	lg := slog.New(handler.NewText(handler.TimeFormat(""), handler.LevelEnabler(levelEnabler), handler.HideLevel(slog.LevelWarn)))
+	ctx = clog.WithLogger(ctx, lg)
+
+	clog.Info(ctx, "Hello, info!")
+	clog.Debug(ctx, "Hello, debug!")
+
+	lvl = slog.LevelDebug
+	clog.Info(ctx, "Hello, info!")
+	clog.Debug(ctx, "Hello, debug!")
+
+	// Output:
+	// INFO  Hello, info!
+	// INFO  Hello, info!
+	// DEBUG Hello, debug!
+}
+
 func ExampleInfof_withAttrsAndGroups() {
 	fakeTime()
 	lg := slog.New(handler.NewText(handler.TimeFormat("15:04:05.0000"), handler.EnabledLevel(slog.LevelInfo)))

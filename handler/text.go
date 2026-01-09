@@ -22,7 +22,11 @@ const RFC3339MillisNoTz = "2006-01-02T15:04:05.000"
 //   - Attributes are written as "key=value" and the value is quoted if it contains Unicode space characters, non-printing characters, '"' or '='.
 //   - The source file and line number are written after the message if the log level is [LevelTrace].
 func NewText(options ...Option) slog.Handler {
-	h := &textHandler{out: allLevelsWriter{out: os.Stdout}, timeFormat: RFC3339MillisNoTz, level: slog.LevelWarn, hideLevelsAbove: slog.Level(math.MaxInt)}
+	h := &textHandler{
+		out:             allLevelsWriter{out: os.Stdout},
+		timeFormat:      RFC3339MillisNoTz,
+		levelEnabler:    func(_ context.Context, level slog.Level) bool { return level >= slog.LevelWarn },
+		hideLevelsAbove: slog.Level(math.MaxInt)}
 	for _, opt := range options {
 		opt(h)
 	}
@@ -114,10 +118,6 @@ func (h *textHandler) HandleFormat(_ context.Context, record *slog.Record, fmtAr
 	return err
 }
 
-func (h *textHandler) SetLevel(l slog.Level) {
-	h.level = l
-}
-
 func (h *textHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	h2 := *h
 	h2.attrs = append(h2.attrs, attrs...)
@@ -132,7 +132,7 @@ func (h *textHandler) WithGroup(name string) slog.Handler {
 
 type textHandler struct {
 	timeFormat      string
-	level           slog.Level
+	levelEnabler    EnabledFunc
 	hideLevelsAbove slog.Level
 	attrs           []slog.Attr
 	groups          []string
@@ -181,8 +181,8 @@ func addGroup(name string, attrs []slog.Attr, buf *bytesBuf) {
 	}
 }
 
-func (h *textHandler) Enabled(_ context.Context, level slog.Level) bool {
-	return level >= h.level
+func (h *textHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	return h.levelEnabler(ctx, level)
 }
 
 // levelString writes the log level as a string to buf, padded to 6 characters.
