@@ -71,7 +71,3 @@ func MustParseLevel(s string) slog.Level {
 	}
 	return l
 }
-
-type LevelSetter interface {
-	SetLevel(slog.Level)
-}
