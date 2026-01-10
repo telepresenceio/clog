@@ -46,21 +46,14 @@ func ExampleNewText() {
 
 func ExampleNewText_levelEnabler() {
 	type lvlKey struct{}
-	lvl := slog.LevelInfo
-	ctx := context.WithValue(context.Background(), lvlKey{}, &lvl)
-	levelEnabler := func(ctx context.Context, level slog.Level) bool {
-		if lvp, ok := ctx.Value(lvlKey{}).(*slog.Level); ok {
-			return level >= *lvp
-		}
-		return false
-	}
-	lg := slog.New(handler.NewText(handler.TimeFormat(""), handler.LevelEnabler(levelEnabler), handler.HideLevel(slog.LevelWarn)))
+	ctx := clog.WithTreeLevel(context.Background(), slog.LevelInfo)
+	lg := slog.New(handler.NewText(handler.TimeFormat(""), handler.LevelEnabler(clog.TreeEnabled), handler.HideLevel(slog.LevelWarn)))
 	ctx = clog.WithLogger(ctx, lg)
 
 	clog.Info(ctx, "Hello, info!")
 	clog.Debug(ctx, "Hello, debug!")
 
-	lvl = slog.LevelDebug
+	clog.SetTreeLevel(ctx, slog.LevelDebug)
 	clog.Info(ctx, "Hello, info!")
 	clog.Debug(ctx, "Hello, debug!")
 
