@@ -81,6 +81,8 @@ func ExampleInfof_withAttrsAndGroups() {
 
 	clog.Info(topCtx, "Hello, world!", slog.GroupAttrs("group", slog.String("this", "value"), slog.Group("hello", slog.Group("that", "thing", "is cool"))))
 
+	clog.Info(clog.With(topCtx, "what", "world"), "Hello!")
+
 	clog.Info(topCtx, "Hello, world!", slog.String("this", "value"), slog.Group("hello", slog.Group("that", "thing", "is cool")))
 
 	clog.Infof(ctx, "Hello, world! %s", slog.GroupAttrs("group", slog.String("this", "value"), slog.Group("hello", slog.Group("that", "thing", `is "cool"`))))
@@ -95,6 +97,7 @@ func ExampleInfof_withAttrsAndGroups() {
 	// 03:04:05.6789 INFO  group/hello: Hello, world! : this=value
 	// 03:04:05.6789 INFO  group: Hello, world! : this=value hello={that=thing is="so \"cool\""}
 	// 03:04:05.6789 INFO  group: Hello, world! : this=value hello/that={thing="is cool"}
+	// 03:04:05.6789 INFO  Hello! : what=world
 	// 03:04:05.6789 INFO  Hello, world! : this=value hello/that={thing="is cool"}
 	// 03:04:05.6789 INFO  group: Hello, world! group=[this=value hello=[that=[thing=is "cool"]]]
 	// 03:04:05.6789 INFO  group: Hello, world! value=2.24

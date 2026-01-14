@@ -49,10 +49,10 @@ func (h *textHandler) HandleFormat(_ context.Context, record *slog.Record, fmtAr
 	}
 
 	hasGroups := false
-	firstGroup := true
+	first := true
 	writeGroup := func(name string) {
-		if firstGroup {
-			firstGroup = false
+		if first {
+			first = false
 		} else {
 			buf.writeByte('/')
 		}
@@ -89,16 +89,22 @@ func (h *textHandler) HandleFormat(_ context.Context, record *slog.Record, fmtAr
 	} else {
 		buf.writeString(record.Message)
 	}
-	if record.NumAttrs() > 0 {
-		buf.writeString(" : ")
-		first := true
-		record.Attrs(func(a slog.Attr) bool {
+	if len(h.attrs)+record.NumAttrs() > 0 {
+		first = true
+		writeAttr := func(a slog.Attr) {
 			if first {
 				first = false
 			} else {
 				buf.writeByte(' ')
 			}
 			addAttr(a, buf)
+		}
+		buf.writeString(" : ")
+		for _, a := range h.attrs {
+			writeAttr(a)
+		}
+		record.Attrs(func(a slog.Attr) bool {
+			writeAttr(a)
 			return true
 		})
 	}
